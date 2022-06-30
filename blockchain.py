@@ -31,5 +31,28 @@ class Blockchain:
       else: 
         new_proof+= 1
     return new_proof   
+   
+   #this function return cryptographic hash of the block of our blockchain
+  def hash(self,block):
+     #.encode is require by hashlib256 which accept string in encoded format
+     #hexdigest give hexadecimal format
+     encoded_block= json.dumps(block,sort_keys=True).encode()
+     return hashlib.sha256(encoded_block).hexdigest()
+  def is_chain_valid(self,chain):
+     previews_block = chain[0]
+     block_index= 1   
+     while (block_index< len(chain)):
+       block = chain[block_index]
+       #if previous block hash does match with current block previous_hash then chain is valid
+       if( block["previous_hash"]!= self.hash(previews_block) ):
+        return False
+       previews_proof = previews_block["proof"]
+       proof = block["proof"]
+       hash_operation= hashlib.sha256(str(previews_proof**2 - proof**2).encode()).hexdigest()
+       if(hash_operation[:4] !="0000"):
+         return False
+       previews_block= block
+       block_index +=1
+     return False
 
 #part2 mining our blockchain
