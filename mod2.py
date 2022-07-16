@@ -90,12 +90,16 @@ class Blockchain:
         self.chain= longest_chain
         return True
     return False 
+
+
 #part2 mining our blockchain
 
 # Creating a flask server
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
+#Creating an address for the node on Port 5000
+node_address= str(uuid4()).replace("-","")
 # Creating a Blockchain
 blockchain = Blockchain()
 
@@ -106,6 +110,7 @@ def mine_block():
   previous_proof= previous_block["proof"]
   proof= blockchain.proof_of_work(previous_proof)
   previous_hash= blockchain.hash(previous_block)
+  blockchain.add_transaction(sender= node_address,receiver='Hadline',amount=1)
   block =blockchain.create_block(proof,previous_hash)
   response = {
     "message": "Congratulations, You just mined a block!",
@@ -118,8 +123,26 @@ def get_chain():
    response = {"chain": blockchain.chain,"length": len(blockchain.chain)}
    return jsonify(response),200
 
+#checking blockchain is valid
+@app.route("/is_valid",methods= ["GET"])
+def is_valid():  
+   is_valid = blockchain.is_chain_valid(blockchain.chain)
+   if is_valid:
+    response = {"message": "All good.The blockchain is valid"}
+   else:
+     response = {"message": "Opps! we have a problem. The blockchain is not valid"}
+   return jsonify(response),200
 
-
+#Adding a new transaction to the blockchain
+@app.route("/add_transaction",methods= ["POST"])
+def add_transaction():      
+ json= request.get_json()
+ transactions_keys = ['sender','receiver','amount']
+ if not all (key in json for key in transactions_keys):
+   return 'Some elements of the transaction are missing', 400
+ index= blockchain.add_transaction(json["sender"],json["receiver"],json["amount"])  
+ response= {"message": f"Transaction will be added to block {index}"}
+ return jsonify(response),201
 # part3 Decentralizing the blockchain 
 app.run(host= "0.0.0.0",port= 5000)   
 
