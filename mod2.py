@@ -110,6 +110,7 @@ def mine_block():
   previous_proof= previous_block["proof"]
   proof= blockchain.proof_of_work(previous_proof)
   previous_hash= blockchain.hash(previous_block)
+  #this is for minor fees transaction 
   blockchain.add_transaction(sender= node_address,receiver='Hadline',amount=1)
   block =blockchain.create_block(proof,previous_hash)
   response = {
@@ -170,5 +171,12 @@ def replace_chain():
      response = {"message": "All good! The chain is the largest one",  'actual_chain': blockchain.chain}
    return jsonify(response),200    
 
+#Create 3 files with different port and run it
+#call get_chain api to check everything working fine
+#connect nodes for each by calling connect_node api for all server(2 Servers other than our own server)
+#mine a block for my server so i will get longest chain
+#calls the replace_chain api to all server to apply consenses
+#add a transaction sending amount from one node to another
+#If we mine block we will add all existing transaction to new mined block 
 app.run(host= "0.0.0.0",port= 5000)   
 
